@@ -2,10 +2,12 @@
 
 -export([
     int_decode/1,
-    int_encode/1
+    int_encode/1,
+    fcap_encode/1,
+    fcap_decode/1
 ]).
 
--nifs([int_encode/1, int_decode/1]).
+-nifs([int_encode/1, int_decode/1, fcap_decode/1, fcap_encode/1]).
 
 -on_load(init/0).
 
@@ -37,3 +39,8 @@ int_encode(_A) ->
 int_decode(_A) ->
     not_loaded(?LINE).
 
+fcap_encode(_A) ->
+    not_loaded(?LINE).
+
+fcap_decode(_A) ->
+    not_loaded(?LINE).
