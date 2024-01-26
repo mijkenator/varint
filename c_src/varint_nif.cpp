@@ -7,7 +7,7 @@
 
 #include <erl_nif.h>
 
-const uint64_t TA = 1706227200;
+const uint64_t TA = 1704067200;
 
 int64_t decodeVarint(uint8_t*& it) {
     uint64_t encoded = 0;
