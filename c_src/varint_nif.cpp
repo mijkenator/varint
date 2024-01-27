@@ -8,6 +8,7 @@
 #include <erl_nif.h>
 
 const uint64_t TA = 1704067200;
+ErlNifBinary sbin_glob;
 
 int64_t decodeVarint(uint8_t*& it) {
     uint64_t encoded = 0;
@@ -70,8 +71,9 @@ int_encode_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
 
 ERL_NIF_TERM
 int_decode_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
-    ErlNifBinary sbin;
     std::vector<ERL_NIF_TERM> retv;
+    ErlNifBinary sbin;
+    retv.reserve(20);
 
     if (!enif_inspect_binary(env, argv[0], &sbin)) {
         return enif_make_badarg(env);
@@ -123,15 +125,15 @@ fcap_encode_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
 
 ERL_NIF_TERM
 fcap_decode_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
-    ErlNifBinary sbin;
     std::vector<ERL_NIF_TERM> retv;
+    retv.reserve(20);
     uint64_t prev_value = 0;
 
-    if (!enif_inspect_binary(env, argv[0], &sbin)) {
+    if (!enif_inspect_binary(env, argv[0], &sbin_glob)) {
         return enif_make_badarg(env);
     }
-    uint8_t* p = sbin.data;
-    uint8_t* end = sbin.data + sbin.size;
+    uint8_t* p = sbin_glob.data;
+    uint8_t* end = sbin_glob.data + sbin_glob.size;
     while ( p < end ){
         uint64_t ri = decodeVarint(p) + prev_value;
         retv.push_back(enif_make_int64(env, ri + TA));

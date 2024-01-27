@@ -29,3 +29,19 @@ decode_fcap_times(N) ->
     varint_nif:fcap_decode(<<218,199,125,1,177,9,178,20,144,78>>),
     decode_fcap_times(N-1).
 
+random_fcap_enc_dec_test() ->
+    Fun = fun() ->
+        {_, FcapLst} = lists:foldl(fun(_, {A, Ret}) -> 
+            A1 = rand:uniform(1000) + A,
+            {A1, [A1 | Ret]}
+        end, {1706124378, []}, lists:seq(1,15)),
+        FcapLstSorted = lists:sort(FcapLst),
+        %?debugFmt("test list: ~p ~n", [FcapLstSorted]),
+        Enc = varint_nif:fcap_encode(FcapLstSorted),
+        %?debugFmt("Enc: ~p ~n", [Enc]),
+        Dec = varint_nif:fcap_decode(Enc),
+        %?debugFmt("Dec: ~p ~n", [Dec]),
+        ?assert(Dec =:= FcapLstSorted),
+        ?debugFmt("Size: ~p,  lst->enc->dec =:= lst OK ", [size(Enc)])
+    end,
+    lists:foreach(fun(_) -> Fun() end, lists:seq(1, 10000)).
