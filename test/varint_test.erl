@@ -18,4 +18,14 @@ integer_test() ->
     ?debugFmt("decode encoded result: ~p ~n", [Re3]),
     ok.
 
+perf_test() ->
+    T1 = os:system_time(microsecond),
+    decode_fcap_times(1000000),
+    Total = os:system_time(microsecond) - T1,
+    ?debugFmt("decode time: ~p ~n", [Total]).
+
+decode_fcap_times(0) -> ok;
+decode_fcap_times(N) ->
+    varint_nif:fcap_decode(<<218,199,125,1,177,9,178,20,144,78>>),
+    decode_fcap_times(N-1).
 

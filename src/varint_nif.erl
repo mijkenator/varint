@@ -4,7 +4,8 @@
     int_decode/1,
     int_encode/1,
     fcap_encode/1,
-    fcap_decode/1
+    fcap_decode/1,
+    perf/1, perf/0
 ]).
 
 -nifs([int_encode/1, int_decode/1, fcap_decode/1, fcap_encode/1]).
@@ -44,3 +45,16 @@ fcap_encode(_A) ->
 
 fcap_decode(_A) ->
     not_loaded(?LINE).
+
+perf() -> perf(10000000).
+perf(N) ->
+    T1 = os:system_time(microsecond),
+    decode_fcap_times(N),
+    Total = os:system_time(microsecond) - T1,
+    io:format("decode time: ~p ~n", [Total]),
+    io:format("single call: ~p micros ~n", [Total / N]).
+
+decode_fcap_times(0) -> ok;
+decode_fcap_times(N) ->
+    varint_nif:fcap_decode(<<218,199,125,1,177,9,178,20,144,78>>),
+    decode_fcap_times(N-1).
