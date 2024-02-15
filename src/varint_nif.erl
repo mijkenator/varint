@@ -5,10 +5,11 @@
     int_encode/1,
     fcap_encode/1,
     fcap_decode/1,
+    get_offset/0,
     perf/1, perf/0
 ]).
 
--nifs([int_encode/1, int_decode/1, fcap_decode/1, fcap_encode/1]).
+-nifs([int_encode/1, int_decode/1, fcap_decode/1, fcap_encode/1, get_offset/0]).
 
 -on_load(init/0).
 
@@ -44,6 +45,9 @@ fcap_encode(_A) ->
     not_loaded(?LINE).
 
 fcap_decode(_A) ->
+    not_loaded(?LINE).
+
+get_offset() ->
     not_loaded(?LINE).
 
 perf() -> perf(10000000).
