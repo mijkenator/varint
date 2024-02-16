@@ -46,3 +46,23 @@ random_fcap_enc_dec_test() ->
         ?debugFmt("Size: ~p,  lst->enc->dec =:= lst OK ", [size(Enc)])
     end,
     lists:foreach(fun(_) -> Fun() end, lists:seq(1, 10000)).
+
+random_fcap_no_enc_dec_test() ->
+    Fun = fun() ->
+        {_, FcapLst} = lists:foldl(fun(_, {A, Ret}) -> 
+            A1 = rand:uniform(1000) + A,
+            {A1, [A1 | Ret]}
+        end, {1706124378, []}, lists:seq(1,15)),
+        FcapLstSorted = lists:sort(FcapLst),
+        %?debugFmt("test list: ~p ~n", [FcapLstSorted]),
+        Enc = varint_nif:fcap_encode_no(FcapLstSorted),
+        %?debugFmt("Enc: ~p ~n", [Enc]),
+        Dec = varint_nif:fcap_decode_no(Enc),
+        %?debugFmt("Dec: ~p ~n", [Dec]),
+        ?assert(Dec =:= FcapLstSorted),
+        ?debugFmt("Size: ~p,  lst->enc->dec =:= lst OK ", [size(Enc)])
+    end,
+    ?debugFmt("------------------------------------------------------------------------------------===================================================", []),
+    lists:foreach(fun(_) -> Fun() end, lists:seq(1, 10000)),
+    ?debugFmt("------------------------------------------------------------------------------------===================================================", []),
+    ok.

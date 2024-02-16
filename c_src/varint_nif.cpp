@@ -217,10 +217,61 @@ fcap_decode_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
     return enif_make_list_from_array(env, retv.data(), retv.size());
 }
 
+ERL_NIF_TERM
+fcap_encode_no_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+    ErlNifBinary retbin;
+    std::vector<uint8_t> retv;
+    unsigned int len;
+    long i64;
+    ERL_NIF_TERM elem, list;
+    retv.reserve(100);
+    uint64_t prev_value = 0;
+
+    list = argv[0];
+    if (!enif_is_list(env, list)) {
+        return enif_make_badarg(env);
+    }
+    enif_get_list_length(env, list, &len);
+    for (uint32_t i = 0; i < len; i++) {
+        if (enif_get_list_cell(env, list, &elem, &list)) {
+            enif_get_int64(env, elem, &i64);
+            encodeVarint(i64 - prev_value, retv);
+            prev_value = i64;
+        }
+    }
+
+
+    auto retlen = retv.size();
+    enif_alloc_binary(retlen, &retbin);
+    memcpy(retbin.data, retv.data(), retlen);
+    return enif_make_binary(env, &retbin);
+}
+
+ERL_NIF_TERM
+fcap_decode_no_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+    std::vector<ERL_NIF_TERM> retv;
+    retv.reserve(20);
+    uint64_t prev_value = 0;
+
+    if (!enif_inspect_binary(env, argv[0], &sbin_glob)) {
+        return enif_make_badarg(env);
+    }
+    uint8_t* p = sbin_glob.data;
+    uint8_t* end = sbin_glob.data + sbin_glob.size;
+    while ( p < end ){
+        uint64_t ri = decodeVarint(p) + prev_value;
+        retv.push_back(enif_make_int64(env, ri));
+        prev_value = ri;
+    }
+
+    return enif_make_list_from_array(env, retv.data(), retv.size());
+}
 
 ErlNifFunc nif_funcs[] = {{"int_encode", 1, int_encode_nif},
                           {"int_decode", 1, int_decode_nif},
                           {"fcap_decode", 1, fcap_decode_nif},
+                          {"fcap_decode_no", 1, fcap_decode_no_nif},
+                          {"fcap_encode_no", 1, fcap_encode_no_nif},
                           {"get_offset", 0, get_offset},
                           {"fcap_encode", 1, fcap_encode_nif}};
 
